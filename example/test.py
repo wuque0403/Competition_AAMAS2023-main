@@ -56,7 +56,7 @@ def train(args):
         if len(new_trajectories) < args.trajectory_size:
             continue
         best_reward = PPO_agent_learner.train(new_trajectories)
-        # PPO_agent_learner.train(new_trajectories)
+
         if PPO_agent_learner.total_steps % args.sync_steps == 0:
             '''for agent in agents:
                 agent.actor_net.load_state_dict(PPO_agent_learner.actor_net.state_dict())'''
@@ -66,13 +66,6 @@ def train(args):
             reward = test_net(env, PPO_agent_learner, Random_agent)
             writer.add_scalar('test_reward', reward, PPO_agent_learner.total_steps)
 
-        '''if PPO_agent_learner.best_rewards is None or PPO_agent_learner.best_rewards < reward:
-            PPO_agent_learner.save(args.save_dir)
-            if PPO_agent_learner.best_rewards is not None:
-                print("Best_mean_rewards updated %.2f -> %.2f, Model saved" % (PPO_agent_learner.best_rewards, reward))
-            PPO_agent_learner.best_rewards = reward'''
-
-        # print("best_rewards is %.2f" % best_reward)
         if best_reward >= args.goal_reward:
             break
 
@@ -92,39 +85,4 @@ if __name__ == "__main__":
     args = parser.parse_args()
     train(args)
 
-    '''obs = env.reset()[0]['obs']
-    # obs = env.all_observes[0]['obs']
-    print(obs)
-    print(env.env_core.agent_selection)
-    action_index = list(np.where(obs['action_mask'] == 1))[0]
-    each = [0] * env.joint_action_space[0][0].n
-    each[action_index[0]] = 1
-    print(each)
-    all_observe, reward, done, _, _ = env.step([[each], [], [], []])
-    print(obs['action_mask'].shape[0], action_index)
-    print(reward, done)
-    print(env.env_core.agent_selection)
-    print(all_observe)
 
-    env = make(args.env)
-    env.set_seed(args.seed)
-    agents = []
-
-    observation_shape = env.input_dimension['player_0']['observation'].shape
-    action_type = env.joint_action_space[0][0]
-    PPO_agent_learner = PPOAgent(observation_shape, action_type.n, args.save_dir, args.device)  # 用于学习
-    PPO_agent_actor = PPOAgent(observation_shape, action_type.n, args.save_dir, args.device)  # 用于生成数据
-    Random_agent = RandomAgent(action_type, False)
-    # agents.append(PPO_agent)
-    for _ in range(env.n_player):
-        agents.append(PPO_agent_actor)
-    trajectories, payoff = run(env, agents)
-    new_trajectories = reorganize(trajectories, payoff)
-    print(new_trajectories[0][0][0]['observation'].shape)
-    obs = new_trajectories[0][0][0]['observation']
-    obs_v = torch.FloatTensor(obs).unsqueeze(0)
-    print(PPO_agent_learner.critic_net(obs_v))
-    states, _, _, _ = PPO_agent_learner.unpack(new_trajectories[0])
-    print(len(new_trajectories[0]), len(states))
-    for _ in range(100):
-        trajectories, payoff = run(env, agents)'''
