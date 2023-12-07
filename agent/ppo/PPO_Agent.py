@@ -36,7 +36,7 @@ class PPOAgent(object):
         obs = torch.FloatTensor(state['observation']).unsqueeze(0)
         action_index = list(np.where(state['action_mask'] == 1))[0]
         action_mask = list(state['action_mask'])
-        policy_values = self.actor_net(obs).squeeze(0)
+        policy_values = self.actor_net(obs).squeeze(0).detach()
         legal_actions_values = []
 
         for index, mask in enumerate(action_mask):
