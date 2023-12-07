@@ -19,9 +19,7 @@ def run(env, agents):
         player_id = env.player_id_map[env.env_core.agent_selection]
         state = all_observes[player_id]['obs']
         if not done:
-            # print(env.env_core.agent_selection)
             trajectories[player_id].append(state)
-    # print(env.env_core.agent_selection)
     # trajectories[player_id].append(state)
     payoff = env.payoff
     return trajectories, payoff
