@@ -5,7 +5,6 @@ from agent.random.random_agent import RandomAgent
 import os
 from utils.utils import run, reorganize
 import argparse
-import torch
 
 
 def test_net(env, agent_one, agent_two, count=100):
@@ -81,7 +80,7 @@ if __name__ == "__main__":
     parser.add_argument('--goal_reward', type=float, default=0.2)
     parser.add_argument("--device", type=str, default='cpu')
     parser.add_argument("--sync_steps", type=int, default=3200)
-    parser.add_argument("--test_steps", type=int, default=1920)
+    parser.add_argument("--test_steps", type=int, default=1600)
     args = parser.parse_args()
     train(args)
 
