@@ -20,12 +20,12 @@ def run(env, agents):
         state = all_observes[player_id]['obs']
         if not done:
             trajectories[player_id].append(state)
-    # trajectories[player_id].append(state)
+    trajectories[player_id].append(state)
     payoff = env.payoff
     return trajectories, payoff
 
 
-def reorganize(trajectories, payoffs):
+def reorganize(trajectories, payoffs):   # trasition: state, action, reward, done
     num_players = len(trajectories)
     new_trajectories = [[] for _ in range(num_players)]
 
@@ -41,4 +41,34 @@ def reorganize(trajectories, payoffs):
             transition.append(done)
 
             new_trajectories[player].append(transition)
+    return new_trajectories
+
+
+def reorganize2(trajectories, payoffs):
+    num_players = len(trajectories)
+    new_trajectories = [[] for _ in range(num_players)]
+
+    for player in range(num_players):
+        if player == 0:
+            for i in range(0, len(trajectories[player])-2, 2):
+                if i == len(trajectories[player]) - 3:
+                    reward = payoffs['player_' + str(player)]
+                    done = True
+                else:
+                    reward, done = 0, False
+                transition = trajectories[player][i:i+3].copy()
+                transition.insert(2, reward)
+                transition.append(done)
+                new_trajectories[player].append(transition)
+        else:
+            for i in range(0, len(trajectories[player]) - 1, 2):
+                if i == len(trajectories[player]) - 2:
+                    reward = payoffs['player_' + str(player)]
+                    done = True
+                else:
+                    reward, done = 0, False
+                transition = trajectories[player][i:i + 2].copy()
+                transition.append(reward)
+                transition.append(done)
+                new_trajectories[player].append(transition)
     return new_trajectories
