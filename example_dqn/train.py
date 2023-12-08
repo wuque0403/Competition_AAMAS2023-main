@@ -34,6 +34,7 @@ def train(args):
         new_trajectories = reorganize2(trajectories, payoffs)[0]
         total_rewards.append(payoffs['player_0'])
         mean_episodes_reward = float(np.mean(total_rewards))
+        writer.add_scalar('mean_episodes_reward', mean_episodes_reward, episode)
         for ts in new_trajectories:
             DQN_agent.feed(ts)
 
@@ -43,7 +44,6 @@ def train(args):
                 print("best_mean_rewards updates %.2f -> %.2f, Model saved" % (best_mean_episodes, mean_episodes_reward))
             best_mean_episodes = mean_episodes_reward
         print("best_mean_reward is %.2f, mean_100episodes_reward is %.2f" % (best_mean_episodes, mean_episodes_reward))
-
         if best_mean_episodes >= args.goal_reward:
             break
 
