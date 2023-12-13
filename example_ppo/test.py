@@ -56,6 +56,8 @@ def train(args):
             continue
         # best_reward = PPO_agent_learner.train(new_trajectories)
         PPO_agent_learner.train(new_trajectories)
+
+        # 同步actors
         if PPO_agent_learner.total_steps % args.sync_steps == 0:
             for agent in agents:
                 agent.actor_net.load_state_dict(PPO_agent_learner.actor_net.state_dict())
@@ -65,15 +67,18 @@ def train(args):
             reward = test_net(env, PPO_agent_learner, Random_agent)
             writer.add_scalar('test_reward', reward, PPO_agent_learner.total_steps)
             print("test_reward is %.2f" % reward)
-            if reward > best_test_reward and best_test_reward is not None:
-                PPO_agent_learner.save(args.save_dir)
-                print("best_test_reward updated %.2f -> %.2f, Model saved" % (best_test_reward, reward))
-                best_test_reward = reward
-            if best_test_reward is None:
+            if best_test_reward is not None:
+                if reward > best_test_reward:
+                    PPO_agent_learner.save(args.save_dir)
+                    print("best_test_reward updated %.2f -> %.2f, Model saved" % (best_test_reward, reward))
+                    best_test_reward = reward
+            else:
                 best_test_reward = reward
             print("best_test_reward is %.2f" % best_test_reward)
-        if best_test_reward >= args.goal_reward:
-            break
+
+        if best_test_reward is not None:
+            if best_test_reward >= args.goal_reward:
+                break
 
 
 if __name__ == "__main__":
@@ -87,7 +92,7 @@ if __name__ == "__main__":
     parser.add_argument('--goal_reward', type=float, default=0.2)
     parser.add_argument("--device", type=str, default='cpu')
     parser.add_argument("--sync_steps", type=int, default=6400)
-    parser.add_argument("--test_steps", type=int, default=6400)
+    parser.add_argument("--test_steps", type=int, default=3200)
     args = parser.parse_args()
     train(args)
 
