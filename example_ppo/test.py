@@ -35,37 +35,44 @@ def train(args):
 
     agents.append(PPO_agent_actor)
     for _ in range(env.n_player - 1):
-        agents.append(Random_agent)
-        # agents.append(PPO_agent_actor)
+        # agents.append(Random_agent)
+        agents.append(PPO_agent_actor)
 
     new_trajectories = []
-    reward = None
+    best_test_reward = None
     writer = SummaryWriter(comment='-test_reward')
     while True:
         trajectories, payoff = run(env, agents)
-        trajectories = reorganize(trajectories, payoff)[0]
-        '''for player in range(env.n_player):
+        trajectories = reorganize(trajectories, payoff)
+        for player in range(env.n_player):
             for transition in trajectories[player]:
                 if len(new_trajectories) < args.trajectory_size:
-                    new_trajectories.append(transition)'''
-        for transition in trajectories:
+                    new_trajectories.append(transition)
+        '''for transition in trajectories:
             if len(new_trajectories) < args.trajectory_size:
-                new_trajectories.append(transition)
+                new_trajectories.append(transition)'''
         print("trajectories length is %d" % len(new_trajectories))
         if len(new_trajectories) < args.trajectory_size:
             continue
-        best_reward = PPO_agent_learner.train(new_trajectories)
-
+        # best_reward = PPO_agent_learner.train(new_trajectories)
+        PPO_agent_learner.train(new_trajectories)
         if PPO_agent_learner.total_steps % args.sync_steps == 0:
-            '''for agent in agents:
-                agent.actor_net.load_state_dict(PPO_agent_learner.actor_net.state_dict())'''
-            agents[0].actor_net.load_state_dict(PPO_agent_learner.actor_net.state_dict())
+            for agent in agents:
+                agent.actor_net.load_state_dict(PPO_agent_learner.actor_net.state_dict())
+            # agents[0].actor_net.load_state_dict(PPO_agent_learner.actor_net.state_dict())
 
         if PPO_agent_learner.total_steps % args.test_steps == 0:
             reward = test_net(env, PPO_agent_learner, Random_agent)
             writer.add_scalar('test_reward', reward, PPO_agent_learner.total_steps)
-
-        if best_reward >= args.goal_reward:
+            print("test_reward is %.2f" % reward)
+            if reward > best_test_reward and best_test_reward is not None:
+                PPO_agent_learner.save(args.save_dir)
+                print("best_test_reward updated %.2f -> %.2f, Model saved" % (best_test_reward, reward))
+                best_test_reward = reward
+            if best_test_reward is None:
+                best_test_reward = reward
+            print("best_test_reward is %.2f" % best_test_reward)
+        if best_test_reward >= args.goal_reward:
             break
 
 
@@ -76,11 +83,11 @@ if __name__ == "__main__":
 
     save_dir = os.path.dirname(os.path.abspath(__file__))
     parser.add_argument("--save_dir", type=str, default=save_dir)
-    parser.add_argument("--trajectory_size", type=int, default=2049)
+    parser.add_argument("--trajectory_size", type=int, default=4097)
     parser.add_argument('--goal_reward', type=float, default=0.2)
     parser.add_argument("--device", type=str, default='cpu')
-    parser.add_argument("--sync_steps", type=int, default=3200)
-    parser.add_argument("--test_steps", type=int, default=1600)
+    parser.add_argument("--sync_steps", type=int, default=6400)
+    parser.add_argument("--test_steps", type=int, default=6400)
     args = parser.parse_args()
     train(args)
 
