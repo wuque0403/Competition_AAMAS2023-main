@@ -90,9 +90,9 @@ if __name__ == "__main__":
     parser.add_argument("--save_dir", type=str, default=save_dir)
     parser.add_argument("--trajectory_size", type=int, default=4097)
     parser.add_argument('--goal_reward', type=float, default=0.2)
-    parser.add_argument("--device", type=str, default='cpu')
-    parser.add_argument("--sync_steps", type=int, default=6400)
-    parser.add_argument("--test_steps", type=int, default=3200)
+    parser.add_argument("--device", type=str, default='cuda')
+    parser.add_argument("--sync_steps", type=int, default=1920)
+    parser.add_argument("--test_steps", type=int, default=1920)
     args = parser.parse_args()
     train(args)
 
